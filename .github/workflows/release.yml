@@ -9,7 +9,7 @@ on:
 
 jobs:
   check-pr-title:
-    uses: conlacda/test-auto-release/.github/workflows/check-pr-title.yml@main
+    uses: phamlong15297/test-auto-release/.github/workflows/check-pr-title.yml@main
 
   build:
     needs: check-pr-title
