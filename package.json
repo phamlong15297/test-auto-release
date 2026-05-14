@@ -1,0 +1,68 @@
+{
+  "name": "sample-electron-app",
+  "version": "3.4.0",
+  "description": "A sample Electron desktop application",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never",
+    "dist:all": "electron-builder --linux deb AppImage --win nsis --publish never",
+    "dist:linux": "electron-builder --linux deb AppImage --publish never",
+    "dist:win": "electron-builder --win nsis --publish never"
+  },
+  "author": {
+    "name": "Developer name",
+    "email": "developer@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.example.sampleelectronapp",
+    "productName": "Sample Electron App",
+    "asar": true,
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    },
+    "files": [
+      "**/*",
+      "!.github/**",
+      "!README.md"
+    ],
+    "linux": {
+      "category": "Utility",
+      "artifactName": "Sample-Electron-App-${version}.${ext}",
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
+  }
+}

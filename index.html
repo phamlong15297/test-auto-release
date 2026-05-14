@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sample Electron App</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>🚀 Hello from Electron</h1>
+      <p>
+        This is a minimal Electron boilerplate. Edit <code>index.html</code>,
+        <code>renderer.js</code>, or <code>main.js</code> and restart to see your
+        changes.
+      </p>
+      <button id="ping-button">Send ping</button>
+      <p id="ping-result" class="ping-result"></p>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
