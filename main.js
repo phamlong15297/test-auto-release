@@ -44,6 +44,7 @@ function setupAutoUpdater(mainWindow) {
 
   autoUpdater.on('download-progress', (progress) => {
     mainWindow.setProgressBar(progress.percent / 100);
+    mainWindow.setTitle(`Sample Electron App v${app.getVersion()} - Downloading update ${Math.round(progress.percent)}%`);
   });
 
   autoUpdater.on('update-available', (info) => {
@@ -63,6 +64,7 @@ function setupAutoUpdater(mainWindow) {
 
   autoUpdater.on('update-downloaded', (info) => {
     mainWindow.setProgressBar(-1);
+    mainWindow.setTitle(`Sample Electron App v${app.getVersion()}`);
     const isAppImage = !!process.env.APPIMAGE;
 
     if (isAppImage) {
@@ -97,6 +99,7 @@ function setupAutoUpdater(mainWindow) {
 
   autoUpdater.on('error', (err) => {
     mainWindow.setProgressBar(-1);
+    mainWindow.setTitle(`Sample Electron App v${app.getVersion()}`);
     console.error('Auto-updater error:', err);
   });
 
