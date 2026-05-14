@@ -1,0 +1,106 @@
+name: Build Release Artifacts
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  check-pr-title:
+    uses: conlacda/test-auto-release/.github/workflows/check-pr-title.yml@main
+
+  build:
+    needs: check-pr-title
+    if: github.event.pull_request.merged == true && needs.check-pr-title.outputs.is_release == 'true'
+    name: Build installers in Docker
+    runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
+    env:
+      HOME: /root
+    outputs:
+      is_release: ${{ needs.check-pr-title.outputs.is_release }}
+      release_version: ${{ needs.check-pr-title.outputs.release_version }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Build Linux and Windows artifacts
+        run: npm run dist:all
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-electron-app-linux
+          path: dist/*.deb
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-electron-app-appimage
+          path: dist/*.AppImage
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-electron-app-windows
+          path: dist/*.exe
+
+      - name: Upload update metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-electron-app-metadata
+          path: dist/*.yml
+
+      - name: Restore workspace ownership
+        if: always()
+        run: |
+          host_uid=$(stat -c '%u' /__w)
+          host_gid=$(stat -c '%g' /__w)
+          chown -R "${host_uid}:${host_gid}" "$GITHUB_WORKSPACE"
+
+  release:
+    if: github.event.pull_request.merged == true && needs.build.outputs.is_release == 'true'
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Prepare artifact directory
+        id: artifacts-path
+        run: |
+          DOWNLOAD_DIR="${{ runner.temp }}/release-artifacts"
+          mkdir -p "$DOWNLOAD_DIR"
+          echo "path=$DOWNLOAD_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ steps.artifacts-path.outputs.path }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ format('v{0}', needs.build.outputs.release_version) }}
+          target_commitish: ${{ github.event.pull_request.merge_commit_sha }}
+          files: |
+            ${{ steps.artifacts-path.outputs.path }}/**/*.deb
+            ${{ steps.artifacts-path.outputs.path }}/**/*.exe
+            ${{ steps.artifacts-path.outputs.path }}/**/*.AppImage
+            ${{ steps.artifacts-path.outputs.path }}/**/*.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

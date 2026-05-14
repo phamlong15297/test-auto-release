@@ -1,0 +1,51 @@
+name: Check PR Title Format
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+    branches:
+      - main
+  # Mark this workflow usable in another
+  workflow_call:
+    outputs:
+      is_pr_title_valid:
+        description: "Is the PR title format correct"
+        value: ${{ jobs.check-pr-title.outputs.is_pr_title_valid }}
+      is_release:
+        description: "Is a release PR"
+        value: ${{ jobs.check-pr-title.outputs.is_release }}
+      release_version:
+        description: "Release version"
+        value: ${{ jobs.check-pr-title.outputs.release_version }}
+jobs:
+  check-pr-title:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    outputs:
+      is_pr_title_valid: ${{ steps.check-pr-title.outputs.is_pr_title_valid }}
+      is_release: ${{ steps.check-pr-title.outputs.is_release }}
+      release_version: ${{ steps.check-pr-title.outputs.release_version }}
+    steps:
+      - name: Check PR Title
+        id: check-pr-title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            const pattern = /^\[(cleanup|improve|feat|fix|refactor|revert|release)\]\[(.+)].+/;
+            const isValid = pattern.test(prTitle);
+            
+            if (isValid) {
+              const match = prTitle.match(pattern);
+              const is_release = match[1] === 'release';
+              const release_version = match[2];
+              core.setOutput('is_pr_title_valid', 'true');
+              core.setOutput('is_release', is_release);
+              core.setOutput('release_version', release_version);
+              console.log(`✅ Valid PR title. Is_release: ${is_release}, Version: ${release_version}`);
+            } else {
+              core.setOutput('is_pr_title_valid', 'false');
+              console.log(`❌ Invalid PR title format: "${prTitle}". It should match the pattern [cleanup|improve|feat|fix|refactor|revert][...] What the PR does. For example: [cleanup][backend] Clean up redundant variables \n[improve][frontend] Improver performance \n[feat][batch] Implement ...\n[fix][UI] Fix bugs \n[refactor][...] Simplify the function\n[revert][backed] revert changes`);
+            }
+# Pull request title follows the semantic rules: https://pulsar.apache.org/contribute/develop-semantic-title/
