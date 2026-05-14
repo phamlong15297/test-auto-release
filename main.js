@@ -38,7 +38,7 @@ function setupAutoUpdater(mainWindow) {
   autoUpdater.autoDownload = false;
   autoUpdater.setFeedURL({
     provider: 'github',
-    owner: 'owner',
+    owner: 'phamlong15297',
     repo: 'test-auto-release',
   });
 
