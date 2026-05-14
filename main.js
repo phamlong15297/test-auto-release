@@ -42,6 +42,10 @@ function setupAutoUpdater(mainWindow) {
     repo: 'test-auto-release',
   });
 
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow.setProgressBar(progress.percent / 100);
+  });
+
   autoUpdater.on('update-available', (info) => {
     dialog.showMessageBox(mainWindow, {
       type: 'info',
@@ -58,6 +62,7 @@ function setupAutoUpdater(mainWindow) {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    mainWindow.setProgressBar(-1);
     const isAppImage = !!process.env.APPIMAGE;
 
     if (isAppImage) {
@@ -91,6 +96,7 @@ function setupAutoUpdater(mainWindow) {
   });
 
   autoUpdater.on('error', (err) => {
+    mainWindow.setProgressBar(-1);
     console.error('Auto-updater error:', err);
   });
 
