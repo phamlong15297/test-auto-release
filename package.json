@@ -1,6 +1,6 @@
 {
   "name": "sample-electron-app",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A sample Electron desktop application",
   "main": "main.js",
   "type": "module",
